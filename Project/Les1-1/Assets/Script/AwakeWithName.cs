@@ -10,4 +10,5 @@ public class AwakeWithName : MonoBehaviour
     {
         Debug.LogFormat("Awake With:{0}", name);
     }
+    
 }
