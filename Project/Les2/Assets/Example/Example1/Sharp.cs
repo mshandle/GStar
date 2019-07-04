@@ -32,6 +32,18 @@ namespace Test
             this.y = y;
         }
     }
+
+    public class Circle
+    {
+        public Point center;
+        public float rad;
+
+        public Circle(Point center,float rad)
+        {
+            this.center = center;
+            this.rad = rad;
+        }
+    }
 }
 
 /// <summary>
@@ -83,5 +95,15 @@ namespace Test2
             drawer.DrawRectangel(point,x, y);
         }
     }
+
+    public class Circle : Sharp
+    {
+        //..
+        public override void Draw(Graphic drawer)
+        {
+           
+        }
+    }
+
 }
 

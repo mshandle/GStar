@@ -62,6 +62,11 @@ namespace FlyweightPatternExample1
             }
             return character;
         }
+
+        public void Update()
+        {
+            //memeryCollction();
+        }
     }
 
     /// <summary>

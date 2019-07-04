@@ -18,7 +18,7 @@ namespace ObserverExample1
             IBM ibm = new IBM("IBM", 120.00);
             ibm.Attach(new Investor("Sorros"));
             ibm.Attach(new Investor("Berkshire"));
-
+            ibm.Attach(new InvestorXXX());
             // Fluctuating prices will notify investors
             ibm.Price = 120.10;
             ibm.Price = 121.00;
@@ -132,4 +132,13 @@ namespace ObserverExample1
             set { _stock = value; }
         }
     }
+
+    class InvestorXXX : IInvestor
+    {
+        public  void Update(Stock stock)
+        {
+            //...
+        }
+    }
+
 }

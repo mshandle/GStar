@@ -30,6 +30,8 @@ namespace Test {
         private List<Line> lines = new List<Line>();
 
         private List<Rect> rects = new List<Rect>();
+        //
+        private List<Circle> circles = new List<Circle>();
         //change
         private bool isCheckLine = false;
         private bool isCheckRect = false;
@@ -57,6 +59,7 @@ namespace Test {
                 float height = Mathf.Abs(curTouch.y - LastTouch.y);
                 rects.Add(new Rect(LastTouch, width, height));
             }
+
         }
 
         public void OnDraw(Graphic graphic)
@@ -72,7 +75,6 @@ namespace Test {
                 graphic.DrawRectangel(e.point, e.x, e.y);
             }
 
-            //...
         }
     }
 
@@ -132,6 +134,7 @@ namespace Test2
                 float height = Mathf.Abs(curTouch.y - LastTouch.y);
                 sharps.Add(new Rect(LastTouch, width, height));
             }
+
         }
 
         public void OnDraw(Graphic graphic)

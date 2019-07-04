@@ -9,58 +9,106 @@ public class TemplateMethodStructure : MonoBehaviour
 {
 	void Start ( )
 	{
-        AbstractClass aA = new ConcreteClassA();
-        aA.TemplateMethod();
+        Application framework = new Application();
+        framework.InitStep1();
+        ApplicationXXX app = new ApplicationXXX();
 
-        AbstractClass aB = new ConcreteClassB();
-        aB.TemplateMethod();
-
+        if (app.InitStep2())
+        {
+            framework.InitStep3();
+        }
+        else
+        {
+            framework.InitStep4();
+        }
     }
 }
 
 /// <summary>
 /// The 'AbstractClass' abstract class
 /// </summary>
-abstract class AbstractClass
+class Application
 {
-    public abstract void PrimitiveOperation1();
-    public abstract void PrimitiveOperation2();
-
-    // The "Template method"
-    public void TemplateMethod()
+    public  void InitStep1()
     {
-        PrimitiveOperation1();
-        PrimitiveOperation2();
-        Debug.Log("");
+        //..
+    }
+    public  void InitStep3()
+    {
+        //..
+    }
+
+    public void InitStep4()
+    {
+        //..
     }
 }
 
 /// <summary>
 /// A 'ConcreteClass' class
 /// </summary>
-class ConcreteClassA : AbstractClass
+class ApplicationXXX : Application
 {
-    public override void PrimitiveOperation1()
+   public bool InitStep2()
     {
-        Debug.Log("ConcreteClassA.PrimitiveOperation1()");
-    }
-    public override void PrimitiveOperation2()
-    {
-        Debug.Log("ConcreteClassA.PrimitiveOperation2()");
+        //...
+        return true;
     }
 }
 
-/// <summary>
-/// A 'ConcreteClass' class
-/// </summary>
-class ConcreteClassB : AbstractClass
+
+
+namespace Test
 {
-    public override void PrimitiveOperation1()
+
+    abstract public class Application
     {
-        Debug.Log("ConcreteClassB.PrimitiveOperation1()");
+        public void Init()
+        {
+            InitStep1();
+            if (InitStep2())
+            {
+                InitStep3();
+            }
+            else
+            {
+                InitStep4();
+            }
+        }
+
+        private void InitStep1()
+        {
+            //..
+        }
+        private void InitStep3()
+        {
+            //..
+        }
+
+        private void InitStep4()
+        {
+            //..
+        }
+
+        protected abstract bool InitStep2();
     }
-    public override void PrimitiveOperation2()
+
+    public class ApllicationBB : Application
     {
-        Debug.Log("ConcreteClassB.PrimitiveOperation2()");
+        protected override bool InitStep2()
+        {
+            return true;
+        }
+    }
+
+
+    public class TemplateMethodStructure : MonoBehaviour
+    {
+        void Start()
+        {
+            Application framework = new ApllicationBB();
+            framework.Init();
+        }
     }
 }
+

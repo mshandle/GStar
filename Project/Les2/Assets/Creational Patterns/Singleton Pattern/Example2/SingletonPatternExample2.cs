@@ -12,6 +12,7 @@ namespace SingletonPatternExample2
         void Start()
         {
             RenderManager.Instance.Show();
+            RenderManager.Instance.Show();
         }
 
         void Update()
@@ -29,7 +30,7 @@ namespace SingletonPatternExample2
     /// </summary>
     public class RenderManager
     {
-        private static RenderManager instance;
+        private static RenderManager instance = null;
         public static RenderManager Instance
         {
             get
@@ -42,6 +43,10 @@ namespace SingletonPatternExample2
             }
         }
 
+        private RenderManager()
+        {
+
+        }
         /// <summary>
         /// 随便某方法
         /// </summary>
@@ -50,6 +55,25 @@ namespace SingletonPatternExample2
             Debug.Log("RenderManager is a Singleton !");
         }
     }
+
+    public class Loger:Singleton<Loger>
+    {
+    
+        public void DoSomeThings()
+        {
+
+        }
+    }
+
+    public class RenderManager2
+    {
+        private static RenderManager2 instance = new RenderManager2();
+        public static RenderManager2 Instance
+        {
+            get { return instance; }
+        }
+    }
+
 
 
 
