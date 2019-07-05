@@ -7,10 +7,10 @@ namespace Framework
     public class SceneMgr : BaseComponentTemplate<SceneMgr>
     {
 
-        public override bool Init()
+        public override bool Init(AppConfig config)
         {
             DebugLog.Log("SceneMgr");
-            return base.Init();
+            return base.Init(config);
         }
     }
 }

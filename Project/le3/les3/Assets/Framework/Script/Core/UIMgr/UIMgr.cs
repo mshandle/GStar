@@ -7,10 +7,10 @@ namespace Framework
     public class UIMgr : BaseComponentTemplate<UIMgr>
     {
 
-        public override bool Init()
+        public override bool Init(AppConfig config)
         {
             DebugLog.Log("UIMgr");
-            return base.Init();
+            return base.Init(config);
         }
     }
 }

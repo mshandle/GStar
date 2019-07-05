@@ -6,10 +6,10 @@ namespace Framework
 {
     public class LocalData : BaseComponentTemplate<LocalData>
     {
-        public override bool Init()
+        public override bool Init(AppConfig config)
         {
             DebugLog.Log("LocalData");
-            return base.Init();
+            return base.Init(config);
         }
     }
 

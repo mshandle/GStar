@@ -31,5 +31,33 @@ StreamingAssets Ä¿Â¼Õâ¸öÄ¿Â¼ºÜÌØÊâ£¬Ëü¸úResourcesÄ¿Â¼²»Ò»ÑùµÄÒ»µã£¬·ÅÔÚÕâ¸öÄ¿Â¼Ä
 
 ÕâÀïÎÒÒ²¼òµ¥µÄÅª¸öÄ¿Â¼´ó¼Ò¿´ÏÂ£¬ºóÆÚµ÷Õû´ó¼Ò¿ÉÒÔ¸ù¾Ý¾ßÌåÏîÄ¿ÒªÇó¡£
 
-1.0ÎÒÃÇ½¨Á¢¿ò¼Ü²ã£¬µÃÃ÷°×ÎÒÃÇÒ»°ãÐèÇóÊÇÄÇÐ©¡£ÎÒ¸Õ¸ÕÒ²Ìáµ½¹ýÁË¼¸¸ö¡£ÎÒÕâ±ßÁÐ¾ÙÏÂ£¬ÎÒÃÇµÈÏÂ¿ò¼Ü²ã£¬Ò²¼òµ¥µÄ°ÑÕâ¸ö¼¸¸öÊµÏÖÏÂ¡£
+ÕâÀïÎÒÃÇ½¨Á¢¼¸¸öÄ¿Â¼£¬Ò»¸öÊÇ¿ò¼Ü²ãµÄÄ¿Â¼£¬Ò»¸öÊÇÒµÎñ²ãµÄÄ¿Â¼¡£¿ò¼Ü²ãÄ¿Â¼ÖÐ¿ÉÒÔ¿´µ½ÎÒ·ÖÁË¼¸¸ö£¬½Å±¾Ä¿Â¼£¬Ò»¸ö²å¼þÄ¿Â¼£¬Ò»¸ö²âÊÔµ¥ÔªÄ¿Â¼¡£
+½Å±¾ÀïÃæÎÒÃÇ·Ö³ÉºËÐÄ²¿·Ö£¬»¹ÊÇÒ»²¿·ÖÊÇÍ¨ÓÃ¹¤¾ß¡£
+
+App...
+
+1.0ÎÒÃÇ½¨Á¢¿ò¼Ü²ã£¬µÃÃ÷°×ÎÒÃÇÒ»°ãÐèÇóÊÇÄÇÐ©¡£ÎÒ¸Õ¸ÕÒ²Ìáµ½¹ýÁË¼¸¸öÏà¹Ø¸´ÓÃ×é¼þ¡£µÈÏÂ¿ò¼Ü²ãÎÒÃÇÒ²¼òµ¥µÄ°ÑÕâ¸ö¼¸¸öÊµÏÖÏÂ¡£ÏÈ´ÓÀàÍ¼¿ªÊ¼¿´
+
+Í¨¹ýÉÏÁ½½Ú¿Î³Ì£¬Õâ´ÎÎÒÃÇ¿´Éè¼Æ¾Í±È½ÏÇáËÉÁË£¬Õâ±ß¿ò¼Ü²ãÎÒ¼òÂÔºÜ¶à¡£´Ó´óµÄ¿´£¬ÎÒÃÇÕâÀïÓÐ¸ö·Ö¸îÏß¡£ÉÏÃæÊÇÎÒÃÇ¹Ø×¢µÄ¿ò¼Ü²ã²¿·Ö£¬Ò²ÀàËÆÎÒÃÇÒÔÇ°×öµÄÀà¿â²¿·Ö¡£
+ÏÂÃæ¾ÍÊÇÎÒÃÇÓ¦ÓÃ²ãµÄ²¿·Ö£¬ÕâÀïÒµÎñ²ãÎÒÃÇ±È½Ï¼òµ¥ ¾ÍÒ»¸öApplicationÀà£¬¼Ì³ÐGameApp¡£ÎÒÃÇµÄÖØÐÄ¹Ø×¢µãÔÚ·Ö¸ôÏßÉÏ²¿·Ö¡£
+
+Õâ±ßÎÒÃÇ¿´µ½ÎÒÃÇ¿ò¼ÜÖÐ£¬GameAppÕâÊÇÉÏ²ãÎÈ¶¨Ä£¿é£¬µ×ÏÂµÄÕâ¸öÄ£¿éÊÇ²»ÎÈ¶¨µÄÄ£¿é¡£µÚ¶þ½ÚËµÁË£¬ÎÈ¶¨ÒÀÀµ³éÏó£¬²»ÒªÒÀÀµÏ¸½Ú¡£
+´ÓÀàÍ¼¿´µ½£¬ÎÒÃÇÕâÀï½¨Á¢ÁË³éÏóBaseComponentÀà£¬ËüÊÇËùÓÐ×é¼þÀàµÄ»ùÀà¡£ÖÐ¼äÖ»ÊÇÒ»¸ö´úÂëµÄ¼¼ÇÉ£¬ÎªÁËÊµÏÖ×é¼þÓëµ¥ÀýµÄ»ìºÏÊ¹ÓÃ¡£¶øÇÒÊ¹ÓÃÁËÄ£°å·½·¨£¬Ìí¼ÓÁËÒ»²ãÄ£°åÀà¡£
+
+ÏÂÃæ¾ÍÊÇÎÒÃÇÉè¼ÆµÄ×é¼þÀà¡£ÎÒÃÇ¾ßÌå¿´ÏÂ´úÂë£¬×î»ù´¡µÄBaseComponentÀà£¬ËüµÄ¸¸ÀàÊÇMonoBehavior£¬ÎªÊ²Ã´Òª¼Ì³ÐËüÄØ£¿Ö÷ÒªÎÒÏëUnity×Ô´øµÄÐ­³Ì¹¦ÄÜ£¬¶øÇÒ×é¼þ±¾ÉíÓÐ´óÁ¿µÄ»Øµ÷Í¨Öª¡£Ò²ÊÇÓÉÓÚ¼Ì³ÐMonoBehavior£¬ÆäÊµÒ²´øÀ´Ò»Ð©ÎÊÌâ¡£
+ÎÒºóÃæËµ£¬ÏÈ¿´BaseComponent£¬ËüÏÖÔÚ·½·¨ºÜ¼òµ¥Õý³£À´Ëµ¸ú µÚÒ»½Ú¿ÎµÄÓÎÏ·Ô­ÀíÒ»Ñù£¬Ìí¼Ó³õÊ¼»¯£¬Ñ­»·£¬ÍË³öÈý¸öÐé·½·¨¡£ÕâÑùÎÒÃÇ¾ÍÊµÏÖÁË×é¼þ×î»ù´¡µÄ¹¦ÄÜ¡£
+BaseComponentTemplate Õâ¸öÄ£°å£¬¿´´úÂë¾ÍÁ½¸ö·½·¨£¬Õâ²¿·ÖÊµÏÖÁËµ¥ÀýÄ£Ê½¡£ÓÃÄ£°å·½·¨£¬ºóÃæÒ»¸ö£¬×¢²áÊµÀý£¬Õâ¸ö·½·¨ºÜÆæ¹Ö£¬¾²Ì¬Ë½ÓÐ¡£ºóÃæÔÙGameApp»áËµµ½ ÎªÊ²Ã´ÒªÕâÑù¡£
+
+¿´µ½Õâ¼¸¸öÎÄ¼þ¼Ð£¬ÎÒÃÇ·ÖÁË¼¸¸öÄ£¿é¡£·ÅÔÚ²»Í¬µÄÎÄ¼þ¼ÐÀïÃæ£¬ÕâÑù´úÂëÄ¿Â¼¿´×ÅÇåÎúµã¡£Ëæ×ÅÏîÄ¿Ô½À´Ô½´ó£¬Ä¿Â¼½¨Á¢Òª»®·ÖµÄÇåÎú£¬Ã¿¸öÄ£¿é¶¼Òª·½±ãÕÒµÃµ½¡£
+
+ÏÖÔÚµ½×îºËÐÄµÄÒ»¿éGameAppÀà£¬ÎÒÃÇÕâÀïAwakeÀïÃæÌí¼ÓÒ»¸öDontDestory£¬ÒòÎªÒ»¸öGameAppµÄÉúÃüÖÜÆÚÊÇËæ×ÅÕû¸öÓÎÏ·µÄ¡£Ö»ÓÐµ½ÓÎÏ·ÍÆ³ö£¬ÎÒÃÇ²Å»áÏú»ÙËü¡£
+
+Õâ±ßÓÐ¸ö³õÊ¼»¯·½·¨£¬ÎÒÃÇÕâÀïÊµÏÖÀàËÆUnity AddComponentµÄ·½·¨£¬ÎÒÃÇ½ÐAddGameCompnent£¬ÎªÊ²Ã´²»Ö±½ÓÓÃ¡£ÆäÊµ»¹ÊÇ¸Õ¸ÕËµµÄ BaseComponentTemplateÀïÃæÎÒÃÇÐèÒªÃ¿´ÎÊ¹ÓÃ²»ÏëGetComponent£¬ÎÒÃÇÓÃÁËÒ»¸öµ¥Àý¡£µ«ÊÇÎªÁË·â×°µ¥Àý£¬²»Ïë²»Á¼µÄÐ´·¨ÆÆ»µÁËµ¥Àý¡£
+
+ÕâÀïÓÃÁËÒ»¸ö·´ÉäµÄ¼¼ÇÉ£¬Ç¿ÖÆµ÷ÓÃÁË¡£°Ñµ±Ç°ÊµÀý·Å½øÈ¥¡£Õâ±ßÊÇÆÆ»µ·â×°ÐÔ¡£ÕâÖ»ÊÇÏà¶ÔµÄ£¬Õâ±ßÆÆ»µÁË¡£µ«ÊÇ¶ÔÓÚÈ«¾ÖµÄÀ´Ëµ»¹ÊÇokµÄ¡£ÎÒÕâÀï×¢ÊÍÒ»²¿·Ö´úÂë£¬Èç¹ûÎÒÃÇ×Ô¼ºÒªÊµÏÖÀàËÆAddComponentºÍGetComponentÄØ£¬´«Èë²ÎÊýÊÇÄ£°å£¬¿ÉÒÔÍ¨¹ýÄ£°å·´ÉäÄ£°åµÄÀàÐÍ£¬ÎÒÃÇµÃµ½Ò»¸ö×Ö·û´®¡£
+ÎÒÃÇÊ¹ÓÃÒ»¸ö×ÖµäÈÝÆ÷¡£
+
+
+
+
 

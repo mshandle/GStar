@@ -11,7 +11,7 @@
             }
         }
 
-        public static T RegisterComponent(T compoent)
+        private static T RegisterComponent(T compoent)
         {
             instance = compoent;
             return instance;

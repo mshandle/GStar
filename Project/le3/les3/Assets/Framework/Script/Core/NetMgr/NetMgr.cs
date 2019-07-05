@@ -6,10 +6,10 @@ namespace Framework {
     public class NetMgr : BaseComponentTemplate<NetMgr>
     {
 
-        public override bool Init()
+        public override bool Init(AppConfig config)
         {
             DebugLog.Log("NetMgr");
-            return base.Init();
+            return base.Init(config);
         }
     }
 }

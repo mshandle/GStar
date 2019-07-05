@@ -6,10 +6,10 @@ namespace Framework
 {
     public class ResoruceMgr : BaseComponentTemplate<ResoruceMgr>
     {
-        public override bool Init()
+        public override bool Init(AppConfig config)
         {
             DebugLog.Log("ResoruceMgr");
-            return base.Init();
+            return base.Init(config);
         }
     }
 

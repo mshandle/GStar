@@ -22,19 +22,14 @@ namespace Framework
             AddGameComponent<SceneMgr>();
             AddGameComponent<UIMgr>();
 
-            bool result = true;
-            foreach(var item in components)
-            {
-                result &= item.Init();
-            }
-            return result;
+            return this.InitComponent(config);
         }
 
         private T AddGameComponent<T>() where T : BaseComponentTemplate<T>
         {
             T component =  this.gameObject.AddComponent<T>();
             Type type = typeof(BaseComponentTemplate<>).MakeGenericType(typeof(T));
-            var method =  type.GetMethod("RegisterComponent",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.Public);
+            var method =  type.GetMethod("RegisterComponent",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic);
             if (method != null)
             {
                 method.Invoke(null,new object[] { component });
@@ -63,5 +58,33 @@ namespace Framework
         }
         */
 
+        #region BASE
+        protected virtual bool InitComponent(AppConfig config)
+        {
+            bool result = true;
+            foreach (var item in components)
+            {
+                result &= item.Init(config);
+            }
+            return result;
+        }
+
+        protected virtual void Update()
+        {
+            float det = Time.deltaTime;
+            foreach (var item in components)
+            {
+                item.GameUpdata(det);
+            }
+        }
+
+        protected virtual void OnApplicationQuit()
+        {
+            foreach (var item in components)
+            {
+                item.Exit();
+            }
+        }
+        #endregion
     }
 }

@@ -9,10 +9,30 @@ namespace Framework
 {
     public class BaseComponent : MonoBehaviour
     {
-        //TODO:
-        public virtual bool Init()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public virtual bool Init(AppConfig config)
         {
             return true;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual void GameUpdata(float det)
+        {
+
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool Exit()
+        {
+            return true;
+        }
+        //TODO:
     }
 }
