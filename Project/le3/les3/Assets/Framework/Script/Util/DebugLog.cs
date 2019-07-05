@@ -16,6 +16,7 @@ namespace Framework
             UnityEngine.Debug.LogFormat(format, args);
         }
 
+
         static public void LogWarning(string msg)
         {
             UnityEngine.Debug.LogWarning(msg);
