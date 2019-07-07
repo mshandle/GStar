@@ -1,5 +1,5 @@
 
-[IGG](https://igg-games.com/) G星计划仓库
+[IGG](https://www.igg.com/) G星计划仓库
 
 ## 第一部分Unity的基础内容解析
 
