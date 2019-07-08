@@ -69,11 +69,11 @@
         "ip": "10.15.1.10:8000"
       },
       {
-        "name": "jibao",
+        "name": "abc",
         "ip": "10.15.119.46:7000"
       },
       {
-        "name": "剑伟",
+        "name": "xx",
         "ip": "10.15.119.43:7000"
       }
            
@@ -224,7 +224,316 @@ ID,Type,SubType,value1,value2,value3,achievement_id
 
 所以这部分常规数据配置工作，一般项目组推荐使用`Excel` 编辑。在实际项目的使用过程中转成`csv`格式读取。
 
-如果在项目组有一些是代码生成的配置，比如有节课我们的说的界面的配置信息。还有`assetbundle` 映射信息，这些都是通过程序生成的。这些配置推荐使用`scriptableObject`
+如果在项目组有一些是代码生成的配置，比如有节课我们的说的界面的配置信息。还有`assetbundle` 映射信息，这些都是通过程序生成的。这些配置推荐使用`scriptableObject`。因为写入的时候都是通过代码序列化，读取反序列的过程代码都是复用的，比较好操作。
+
+### 工程实现
+
+```C#
+public class Table
+{
+     private Dictionary<string, TableRecord> m_map = new Dictionary<string, TableRecord>();
+    public bool LoadTable(string contextstr,string filename,int mode = 0)
+    {
+        //TODO:
+    }
+    public int count()
+    {
+         return m_map.Count;
+    }
+    public TableRecord query(string key)
+    {
+         //TODO:
+    }
+    public  TableRecord query(int nid)
+    {
+          
+    }
+    public  TableRecord queryIndex(int nindex)
+    {
+          
+    }
+}
+```
+
+
+
+
+
+```
+public class TableRecord
+    {
+        private Dictionary<string, TableData> m_datas = new Dictionary<string, TableData>();
+
+        public string MainKey { set; get; }
+
+        public TableData Get(string key)
+        {
+            if (m_datas.ContainsKey(key))
+            {
+                return m_datas[key];
+            }
+            return null;
+        }
+
+        public bool HasValue(string key)
+        {
+            return m_datas.ContainsKey(key);
+        }
+
+        public void AddValue(string key, TableData value)
+        {
+            if (m_datas.ContainsKey(key))
+            {
+                m_datas[key] = value;
+            }
+            else
+            {
+                m_datas.Add(key, value);
+            }
+        }
+    }
+```
+
+
+
+```c#
+
+    public class LocalData : BaseComponentTemplate<LocalData>
+    {
+        Dictionary<string, Table> datas = new Dictionary<string, Table>();
+        public override bool Init(AppConfig config)
+        {
+            DebugLog.Log("LocalData");
+            return base.Init(config);
+        }
+
+        public Table GetTable(string key)
+        {
+            Table table;
+            if(datas.TryGetValue(key, out table))
+            {
+                return table;
+            }
+            return null;
+        }
+
+        public void AddTable(string key, Table table)
+        {
+            datas[key] = table;
+        }
+
+    }
+```
+
+## 消息中心
+
+```c#
+namespace FrameWork
+{
+    public delegate void MsgDelegate(IMessage message);
+
+    public interface IEventSet
+    {
+        void RegisterMsg(string name, MsgDelegate cb);
+
+        void ExecuteMsg(IMessage message);
+
+        void RemoveMsg(string name, MsgDelegate cb);
+
+        bool HasMsg(string name, MsgDelegate cb);
+
+        void RemoveAll();
+
+    }
+}
+
+```
+
+
+
+```c#
+using System;
+using System.Collections.Generic;
+
+namespace FrameWork
+{
+    public class EventSet : IEventSet
+    {
+        private Dictionary<string, Delegate> _MsgMap = null;
+
+        public EventSet()
+        {
+            _MsgMap = new Dictionary<string, Delegate>();
+        }
+        public virtual void RegisterMsg(string name, MsgDelegate cb)
+        {
+            Delegate del;
+            if (_MsgMap.TryGetValue(name,out del))
+            {
+                _MsgMap[name] = Delegate.Combine(del, cb);
+            }
+            else
+            {
+                _MsgMap[name] = cb;
+
+            }
+        }
+
+        public virtual void ExecuteMsg(IMessage message)
+        {
+            Delegate del;
+            if (_MsgMap.TryGetValue(message.Name, out del))
+            {
+                MsgDelegate cb = del as MsgDelegate;
+                if (null != cb)
+                {
+                    cb(message);
+                }
+            }
+        }
+
+        public virtual void RemoveMsg(string name, MsgDelegate cb)
+        {
+            Delegate dMulti;
+            if (_MsgMap.TryGetValue(name, out dMulti))
+            {
+                Delegate currentDel = Delegate.Remove(dMulti, cb);
+
+                if (currentDel == null)
+                {
+                    _MsgMap.Remove(name);
+                }
+                else
+                {
+                    _MsgMap[name] = currentDel;
+                }
+            }
+        }
+
+        public virtual bool HasMsg(string name, MsgDelegate cb)
+        {
+            if (!_MsgMap.ContainsKey(name)) return false;
+
+
+            Delegate[] dels = _MsgMap[name].GetInvocationList();
+            for (int i = 0; i < dels.Length; i++)
+            {
+                if (dels[i].Equals(cb))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public virtual  void RemoveAll()
+        {
+            _MsgMap.Clear();
+        }
+    }
+}
+
+```
+
+
+
+```C#
+
+using System;
+public class Message : IMessage
+{
+    public Message(string name)
+        : this(name, null, null)
+	{ }
+
+    public Message(string name, object body)
+        : this(name, body, null)
+	{ }
+
+    public Message(string name, object body, string type)
+	{
+		m_name = name;
+		m_body = body;
+		m_type = type;
+	}
+
+	/// <summary>
+	/// Get the string representation of the <c>Notification instance</c>
+	/// </summary>
+	/// <returns>The string representation of the <c>Notification</c> instance</returns>
+	public override string ToString()
+	{
+		string msg = "Notification Name: " + Name;
+		msg += "\nBody:" + ((Body == null) ? "null" : Body.ToString());
+		msg += "\nType:" + ((Type == null) ? "null" : Type);
+		return msg;
+	}
+
+	/// <summary>
+    /// The name of the <c>Notification</c> instance
+    /// </summary>
+	public virtual string Name
+	{
+		get { return m_name; }
+	}
+		
+    /// <summary>
+    /// The body of the <c>Notification</c> instance
+    /// </summary>
+	/// <remarks>This accessor is thread safe</remarks>
+	public virtual object Body
+	{
+		get
+		{
+			// Setting and getting of reference types is atomic, no need to lock here
+			return m_body;
+		}
+		set
+		{
+			// Setting and getting of reference types is atomic, no need to lock here
+			m_body = value;
+		}
+	}
+		
+	/// <summary>
+	/// The type of the <c>Notification</c> instance
+	/// </summary>
+	/// <remarks>This accessor is thread safe</remarks>
+	public virtual string Type
+    {
+		get
+		{
+			// Setting and getting of reference types is atomic, no need to lock here
+			return m_type;
+		}
+		set
+		{
+			// Setting and getting of reference types is atomic, no need to lock here
+			m_type = value;
+		}
+	}
+
+	/// <summary>
+    /// The name of the notification instance 
+    /// </summary>
+	private string m_name;
+
+    /// <summary>
+    /// The type of the notification instance
+    /// </summary>
+	private string m_type;
+
+    /// <summary>
+    /// The body of the notification instance
+    /// </summary>
+	private object m_body;
+}
+
+
+```
+
+
 
 ## 网络通信
 
@@ -239,14 +548,6 @@ ID,Type,SubType,value1,value2,value3,achievement_id
 #### 自定义二进制
 
 #### Protocol buffer
-
-### 接口层面
-
-
-
-## 消息中心
-
-## 多线程
 
 ## 框架层
 
