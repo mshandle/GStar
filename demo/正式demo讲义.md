@@ -791,7 +791,43 @@ UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWeb
 
 对于其他情况，就用`LoadAsset`或`LoadAssetAsync`吧。
 
+###  `AssetBundle`依赖
 
+在Unity5的`AssetBundle`系统中，`AssetBundles`间的依赖，根据不同的运行环境，可以通过两个不同的API来跟踪。在Unity编辑器中，`AssetBundle`依赖关系可以通过[AssetDatabase](http://docs.unity3d.com/ScriptReference/AssetDatabase.html?_ga=1.159540478.236528352.1476878759)API去查询。AssetBundle的分配和依赖可以通过[AssetImporter](http://docs.unity3d.com/ScriptReference/AssetImporter.html?_ga=1.223971544.236528352.1476878759)API访问和改变。运行时，Unity提供一个` ScriptableObject-based` [AssetBundleManifest](https://link.jianshu.com?t=http://docs.unity3d.com/ScriptReference/AssetBundleManifest.html) 去加载构建`AssetBundle`时生成的依赖信息。
+
+当`AssetBundle`的父`AssetBundle`（直接引用）中Object有引用其他的`AssetBundle`中的Object，那么就存在了间接引用关系（这个关系并没有记录在清单中）。关于对象间引用的更多信息，请查看[Assets,Objects and Serialization](https://unity3d.com/assets-objects-and-serialization)一文中的[对象间的引用](https://unity3d.com/assets-objects-and-serialization#InterObject_References)章节。
+
+如[Assets, Objects and Serialization](https://unity3d.com/assets-objects-and-serialization)一文里[序列化和实例](https://unity3d.com/assets-objects-and-serialization#Serialization_and_Instances)段落中描述的一样，Object数据被糅合在`AssetBundle`中，以`FileGUID`和`LocalID`作为唯一标识。
+
+Object在他的实例ID被第一次引用时被加载；Object在其`AssetBundle`被加载时，被赋予一个有效的实例ID。由此看来，加载一个Object之前应该先把其依赖项所在的`AssetBundles`全都加载了。而并不是说拥有依赖关系的`AssetBundle`之间必须按顺序加载。Unity不会在一个父`AssetBundle`加载时，帮你把其子`AssetBundles`都自动加载的。
+
+**示例：**
+假设*材质A*引用*纹理B*。材质A被打包至AssetBundle1，而纹理B被打包到AssetBundle2。![img](https://unity3d.com/sites/default/files/learn/ab1.jpg)
+
+在此用例中，从AssetBundle1中加载材质A之前，必须要先加载AssetBundle2。
+
+
+
+这并不意味着AssetBundle2必须要先于AssetBundle1加载，或者纹理B必须显式的从AssetBundle2中加载。只有从AssetBundle1中加载材质A时，AssetBundle2才需要先加载。
+
+在AssetBundle1加载时，Unity*不会*自动加载AssetBundle2。这必须通过脚本手动完成。上面提到的`AssetBundle`的API都可以任意用于加载AssetBundles1和AssetBundles2上，随意组合。通过`WWW.LoadFromCacheOrDownload`加载`AssetBundles`，可以任意和通过`AssetBundle.LoadFromFile`或`AssetBundle.LoadFromMemoryAsync`加载`AssetBundles`组合在一起。
+
+#### `AssetBundle`清单(manifests)
+
+当通过接口`BuildPipeline.BuildAssetBundles`执行`AssetBundle`的构建流程时，Unity会序列化一个对象，它包含每个`AssetBundle`的依赖信息。这个数据存储在一个单独的`AssetBundle`中，而这个`AssetBundle`只包含一个[AssetBundleManifest](http://docs.unity3d.com/ScriptReference/AssetBundleManifest.html?_ga=1.167928674.236528352.1476878759)类型的对象。
+
+这个Asset所在的`AssetBundle`和构建的`AssetBundles`在同一个目录中，其（这个Asset所在的`AssetBundle`）名称就是这个目录名。如果项目将`AssetBundles`构建至*(工程目录)/build/Client*，那么包含清单的`AssetBundle`将会保存为`(工程目录)/build/Client/Client.manifest`。
+
+包含清单的这个`AssetBundle`可以被加载，缓存，卸载。就像其他的`AssetBundle`一样。
+
+`AssetBundleManifes`t对象本身提供[GetAllAssetBundles](http://docs.unity3d.com/ScriptReference/AssetBundleManifest.GetAllAssetBundles.html?_ga=1.197773292.236528352.1476878759)接口，用来罗列所有和清单一起构建的`AssetBundle`。还有两个方法，用来查询指定`AssetBundle`的依赖：
+
+[AssetBundleManifest.GetAllDependencies](http://docs.unity3d.com/ScriptReference/AssetBundleManifest.GetAllDependencies.html?_ga=1.30984444.236528352.1476878759)返回`AssetBundle`所有的依赖，包括迭代依赖。
+
+```C#
+AssetBundle assetBundle = AssetBundle.LoadFromFile(manifestFilePath);
+AssetBundleManifest manifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+```
 
 ### 管理已经加载Asset Bundle
 
@@ -799,11 +835,11 @@ UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWeb
 
 在内存紧张的环境中，小心控制加载Objects的大小和数量尤为重要。Objects被移出激活的场景时，Unity不会自动卸载他们。Asset的清理会在特定的时间触发，当然也可以手动触发
 
-> [Resources.UnloadUnusedAssets](https://link.jianshu.com/?t=http://docs.unity3d.com/ScriptReference/Resources.UnloadUnusedAssets.html?_ga=1.234006365.236528352.1476878759) 
+> [Resources.UnloadUnusedAssets](http://docs.unity3d.com/ScriptReference/Resources.UnloadUnusedAssets.html?_ga=1.234006365.236528352.1476878759) 
 
-必须小心的管理`AssetBundles`自身文件。一个`AssetBundle`在本地存储（不论是在`UnityCache`中，还是通过[AssetBundle.LoadFromFile](https://link.jianshu.com?t=http://docs.unity3d.com/ScriptReference/AssetBundle.LoadFromFile.html?_ga=1.25769917.1251464125.1470796528)加载的文件）中以一个文件的形式存在时，其占用的内存开销很小，几乎不会超过10-40kb。但如果有大量的`AssetBundles`存在，这开销依旧不容忽视。
+必须小心的管理`AssetBundles`自身文件。一个`AssetBundle`在本地存储（不论是在`UnityCache`中，还是通过[AssetBundle.LoadFromFile](http://docs.unity3d.com/ScriptReference/AssetBundle.LoadFromFile.html?_ga=1.25769917.1251464125.1470796528)加载的文件）中以一个文件的形式存在时，其占用的内存开销很小，几乎不会超过10-40kb。但如果有大量的`AssetBundles`存在，这开销依旧不容忽视。
 
-因为多数工程允许用户重复体验某内容（比如重玩一个关卡），所以知道什么时候去加载或卸载一个`AssetBundle`就尤为重要了。**如果一个`AssetBundle`被不恰当的卸载了，这可能会引起Object在内存中存重复存在。**不恰当的卸载`AssetBundle`在某些情况下也会导致与期望不符的表现，比如：引起纹理的缺失。想要知道为什么会发生这些，请参阅[Assets,Objects和序列化](https://link.jianshu.com?t=https://unity3d.com/learn/tutorials/topics/best-practices/assets-objects-and-serialization)文章中的段落[Object之间的引用](https://link.jianshu.com?t=https://unity3d.com/learn/tutorials/topics/best-practices/assets-objects-and-serialization#InterObject_References)。
+因为多数工程允许用户重复体验某内容（比如重玩一个关卡），所以知道什么时候去加载或卸载一个`AssetBundle`就尤为重要了。**如果一个`AssetBundle`被不恰当的卸载了，这可能会引起Object在内存中存重复存在。**不恰当的卸载`AssetBundle`在某些情况下也会导致与期望不符的表现，比如：引起纹理的缺失。想要知道为什么会发生这些，请参阅[Assets,Objects和序列化](https://unity3d.com/learn/tutorials/topics/best-practices/assets-objects-and-serialization)文章中的段落[Object之间的引用](https://unity3d.com/learn/tutorials/topics/best-practices/assets-objects-and-serialization#InterObject_References)。
 
 管理`Assets`和`AssetBundles`时，最重要的事情莫过于清楚，调用`AssetBundle.Unload`时传入参数*true*或*false*，分别会发生什么情况，有何不同。
 
@@ -821,6 +857,18 @@ UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWeb
 ![](https://unity3d.com/sites/default/files/ab2c.jpg)
 
 如果调用`AssetBundle.LoadAsset()`去重新加载*M*，Unity不会将旧的*M*副本解释为`AssetBundle`中的实例数据。所以Unity会去加载一个新的*M*副本，因此这里会有两个完全一样的M副本存在在场景中。
+
+![](https://unity3d.com/sites/default/files/ab2d.jpg)
+
+对于大多数项目来说，这不是想要的行为。大多数项目应该使用`AssetBundle.Unload(true)`，并且用一些方法确保这些Objects不会重复出现。常见的两种方法：
+
+1. 在应用生命周期中，一些明显的界限点（不同场景之间，或加载界面中）上，将那些短暂的（不是全局存在的基础包）`AssetBundles`卸载掉的。这是最简单和常见的选项。
+2. 单独地为每个Objects维护引用计数，只有当`AssetBundle`中所有Objects都未被使用时，才去卸载掉它`AssetBundle`。这就允许应用去卸载和重载单独的Objects，而不会出现重复的内存。
+
+如果一个应用必须使用`AssetBundle.Unload(false)`，那么只能通过下面两种方法将单独的Objects卸载：
+
+1. 消除这个不想要的Object的所有引用，场景中和代码中的都要清除掉。都做好了，就可以调用[Resources.UnloadUnusedAssets](http://docs.unity3d.com/ScriptReference/Resources.UnloadUnusedAssets.html?_ga=1.234006365.236528352.1476878759)了。
+2. 以非叠加的方式加载一个场景。这样会销毁当前场景中的所有Objects，然后自动调用[Resources.UnloadUnusedAssets](http://docs.unity3d.com/ScriptReference/Resources.UnloadUnusedAssets.html?_ga=1.223912536.236528352.1476878759)。
 
 ### 发布
 
