@@ -619,7 +619,7 @@ Google 推出的一套跨平台传输协议，非常推荐使用。支持常用�
 一个`AssetBundle`中包含两个部分：**文件头**和**数据段。**
 文件头是在构建`AssetBundle`时由Unity生成的。它包含了`AssetBundle`的信息，比如：`AssetBundle`的标识，`AssetBundle`是否被压缩，还有一个清单。这个清单是一个*查询表*，以**对象**的名字为键。每一项提供一个字节的索引来标识在`AssetBundle`的数据段中给定对象的位置。在大多数平台，这个查询表使用`STL`的`std::multimap`实现的。虽然具体算法依赖不同平台`STL`实现方式，但大多数都是平衡树的一种。Windows和OSX衍生系统（包括IOS）使用的是**红黑树**。所以，构建清单的时间和`AssetBundle`s中资源数量，***不是线性关系那么乐观*。**
 
-**数据段**包含本`AssetBundle`中序列化的`Assets`原始数据。如果数据段被压缩，那么**LZMA**算法将会被应用到所有序列化的字节，也就是先序列化所有的`assets`，然后对整个字节数组进行压缩。
+**数据段**包含本`AssetBundle`中序列化的`Assets`原始数据。如果选择数据段被压缩，其中**LZMA**算法将会被应用到所有序列化的字节，也就是先序列化所有的`assets`，然后对整个字节数组进行压缩。
 
 Unity5.3之前，`AssetBundle`中的`Objects`不会被单独压缩。因此，5.3之前的Unity若是想从压缩的`AssetBundle`中读取一个或多个Objects就需要将整个`AssetBundle`解压缩。一般来说，为了提高后续在同一个`AssetBundle`加载的性能，Unity会缓存一个`AssetBundle`解压后的副本。
 
@@ -627,7 +627,171 @@ Unity5.3添加了**LZ4**压缩选项。由**LZ4**压缩选项构建的`AssetBund
 
 ### 加载Asset Bundles
 
+在Unity5中，`AssetBundles`可以通过四个不同的API加载。这四个API根据下面两个条件情况将有不同的行为：
+
+1. `AssetBundle`是否被压缩，是使用LZMA压缩还是LZ4压缩
+
+2. `AssetBundle`在什么平台上加载
+
+这四个API是：
+
+- [AssetBundle.LoadFromMemoryAsync](http://docs.unity3d.com/ScriptReference/AssetBundle.LoadFromMemoryAsync.html?_ga=1.126585038.236528352.1476878759)
+
+- [AssetBundle.LoadFromFile](http://docs.unity3d.com/ScriptReference/AssetBundle.LoadFromFile.html?_ga=1.126585038.236528352.1476878759)
+
+- [WWW.LoadFromCacheOrDownload](http://docs.unity3d.com/ScriptReference/WWW.LoadFromCacheOrDownload.html?_ga=1.126575566.236528352.1476878759)
+
+- [UnityWebRequest](http://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest.html?_ga=1.126575566.236528352.1476878759)的[DownloadHandlerAssetBundle](http://docs.unity3d.com/ScriptReference/Networking.DownloadHandlerAssetBundle.html?_ga=1.131703884.236528352.1476878759)(至少是Unity5.3)
+
+####  `AssetBundle.LoadFromMemory(Async)`
+
+​	**Unity建议不要使用这个函数**
+
+[AssetBundle.LoadFromMemoryAsync](http://docs.unity3d.com/ScriptReference/AssetBundle.LoadFromMemoryAsync.html?_ga=1.159539326.236528352.1476878759)从托管代码的字节数组中加载`AssetBundle(C#中的byte[])`.它总是将源数据从托管代码的字节数组中拷贝到一个新分配连续的本地内存块中.如果`AssetBundle`是`LZMA`压缩格式，它将在拷贝时将`AssetBundle`解压。未压缩和`LZ4`压缩的`AssetBundles`将逐字拷贝。
+
+这个API所消耗的内存峰值至少是`AssetBundle`**大小的两倍**：一份是API所创建的本地内存中的副本，一份是传递给API的托管字节数组。通过这个API从`AssetBundle`中加载的`Assets`，因此会在内存中出现*3次*：一次是从托管代码的字节数组，一次是`AssetBundle`的本地内存副本，还有一次是GPU或系统内存中。
+
+```c#
+IEnumerator LoadFromMemoryAsync(string path)
+{
+    AssetBundleCreateRequest createRequest = 	AssetBundle.LoadFromMemoryAsync(File.ReadAllBytes(path));
+
+    yield return createRequest;
+
+    AssetBundle bundle = createRequest.assetBundle;
+
+    var prefab = bundle.LoadAsset.<GameObject>("MyObject");
+    Instantiate(prefab);
+}
+```
+
+####  `AssetBundle.LoadFromFile(Async)`
+
+[ssetBundle.LoadFromFile](http://docs.unity3d.com/ScriptReference/AssetBundle.LoadFromFile.html?_ga=1.203148498.236528352.1476878759)是一个用来从本地（一块硬盘或一个SD卡）加载未压缩`AssetBundle`的高效API。如果`AssetBundles`是未压缩的或LZ4压缩，这个API的行为如下：
+
+*移动设备：*API只会加载`AssetBundle`的文件头，不会从硬盘中加载剩余的数据。`AssetBundle`的`Objects`只有被加载方法调用(比如`AssetBundle.Load`)，或实例ID被间接引用时，才会被加载。在这个情境中没有额外的内存被消耗。
+
+*Unity编辑器：*这个API将会把整个`AssetBundle`加载到内存中，就如`AssetBundle.LoadFromMemoryAsync`被调用一样，将所有字节从硬盘中读出。如果项目在Unity编辑器中进行评估，这个API在`AssetBundle`加载时，将会引起内存峰值。不过这不会影响实机上的表现，在实机上需要重新测试下，确定会遇到峰值问题再进行补救行为。
+
+>  *备注：*对**LZMA**压缩的`AssetBundles`调用`AssetBundle.LoadFromFile`将会失败。
+>
+> ```c#
+> public class LoadFromFileExample extends MonoBehaviour 
+> {
+>     function Start() {
+>         var myLoadedAssetBundle = AssetBundle.LoadFromFile(Path.Combine(Application.streamingAssetsPath, "myassetBundle"));
+>         if (myLoadedAssetBundle == null) {
+>             Debug.Log("Failed to load AssetBundle!");
+>             return;
+>         }
+>         var prefab = myLoadedAssetBundle.LoadAsset.<GameObject>("MyObject");
+>         Instantiate(prefab);
+>     }
+> }
+> ```
+
+#### `WWW.LoadFromCacheOrDownload`
+
+[WWW.LoadFromCacheOrDownload](http://docs.unity3d.com/ScriptReference/WWW.LoadFromCacheOrDownload.html?_ga=1.224028504.236528352.1476878759)是一个从远端服务器或本地存储加载Objects的API。本地文件可以通过添加`file://` URL进行加载。如果`AssetBundle`已经在Unity缓存中了，这个API的处理方式和`AssetBundle.LoadFromFile`一模一样。
+
+如果`AssetBundle`还未被缓存，`WWW.LoadFromCacheOrDownload`将会从他的源地址读取`AssetBundle`。如果`AssetBundle`被压缩了，将会在工作线程中解压并写入缓存。否则，他将通过工作线程被直接写入缓存。
+
+一旦`AssetBundl`e被缓存，`WWW.LoadFromCacheOrDownload`将从缓存中加载头信息，解压`AssetBundle`。接着API的表现与通过`AssetBundle.LoadFromFile`加载`AssetBundle`一致。
+
+>   备注：当数据被解压并通过一个固定大小的缓冲区写入缓存，WWW对象将在本地内存中保持一份完整的`AssetBundle`字节副本。保留这个额外的`AssetBundle`副本是为了支持[WWW.bytes](http://docs.unity3d.com/ScriptReference/WWW-bytes.html?_ga=1.122801224.236528352.1476878759)这个属性。
+
+**由于在WWW对象中缓存一份`AssetBundle`内容字节的内存开销**，建议所有使用`WWW.LoadFromCacheOrDownload`的开发者确保他们的`AssetBundles`小一些：最多几兆。接下来还有个建议，对那些对内存有限制的平台（比如移动设备）的开发者：为了防止内存峰值，确保同一时间代码中只下载一个`AssetBundle`。
+
+> 备注：每调用一次这个API将会创建一个新的工作线程。当多次调用这个API时，注意此时创建了过多的线程。如果超过5-10个`AssetBundles`需要下载，建议你的代码写成可以确保只有少量的`AssetBundle`在同时下载。
+
+
+
+```c#
+using UnityEngine;
+using System.Collections;
+
+public class LoadFromCacheOrDownloadExample : MonoBehaviour
+{
+    IEnumerator Start ()
+    {
+            while (!Caching.ready)
+                    yield return null;
+
+        var www = WWW.LoadFromCacheOrDownload("http://myserver.com/myassetBundle", 5);
+        yield return www;
+        if(!string.IsNullOrEmpty(www.error))
+        {
+            Debug.Log(www.error);
+            yield return;
+        }
+        var myLoadedAssetBundle = www.assetBundle;
+
+        var asset = myLoadedAssetBundle.mainAsset;
+    }
+}
+```
+
+
+
+#### `AssetBundleDownloadHandler`
+
+[UnityWebRequest](http://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest.html?_ga=1.236504258.236528352.1476878759)在Unity5.3中引入到移动平台上，相比于[WWW](http://docs.unity3d.com/ScriptReference/WWW.html?_ga=1.190498024.236528352.1476878759) 它提供了另一种更灵活的选择。`UnityWebRequest`允许开发者指定如何处理下载的数据，并且让开发者避免不必要的内存使用。通过`UnityWebRequest`下载一个`AssetBundle`最简单的方法就是调用[UnityWebRequest.GetAssetBundle](http://docs.unity3d.com/ScriptReference/Networking.DownloadHandlerAssetBundle.html?_ga=1.234988226.236528352.1476878759)。
+
+根据这篇文章的主题，我们最关心的类就是[DownloadHandlerAssetBundle](http://docs.unity3d.com/ScriptReference/Networking.DownloadHandlerAssetBundle.html?_ga=1.226543582.236528352.1476878759)。使用时，这个`DownloadHandler`表现的和`WWW.LoadFromCacheOrDownload`一样。使用一个工作线程，他将下载的数据放入一个固定大小的缓冲，然后根据`DownloadHandler`的配置，将缓冲数据移至一个临时存储或`AssetBundle`缓存。**LZMA**压缩的`AssetBundles`在下载时将会被解压，然后缓存起来。
+
+所有的这些操作都发生在本地代码，避免了扩大托管堆的风险。而且，这个`DownloadHandler`*没有*在本地代码中保存下载字节的副本，这样减少了下载`AssetBundl`e带来的内存占用。
+
+当下载结束了，可以通过`DownloadHandler`的[assetBundle](http://docs.unity3d.com/ScriptReference/Networking.DownloadHandlerAssetBundle-assetBundle.html?_ga=1.204652755.236528352.1476878759)属性，访问下载好的`AssetBundle`，就像对下载好的`AssetBundle`调用`AssetBundle.LoadFromFile`一样。
+
+`UnityWebRequest`也支持像`WWW.LoadFromCacheOrDownload`一样的缓存方式。如果提供给`UnityWebRequest`对象的缓存信息中，正在请求的`AssetBundle`已经在Unity缓存中了，那么`AssetBundle`将会立即可用，并且这个API将会进行和`AssetBundle.LoadFromFile`一样的操作。
+
+>  备注：Unity的`AssetBundle`缓存在`WWW.LoadFromCacheOrDownload`和`UnityWebRequest`之间是共享的。在一个API中下载的任何`AssetBundle`在另一个API中也是有效的。
+
+> *备注：*不像`WWW`，`UnityWebRequest`系统它内部维护一个工作线程池，还有一个内部任务系统来确保开发者不会同时启动过量的下载。线程池的大小目前无法配置。
+
+```C#
+IEnumerator InstantiateObject()
+{
+    string uri = "file:///" + Application.dataPath + "/AssetBundles/" + assetBundleName;        
+UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.GetAssetBundle(uri, 0);
+    yield return request.Send();
+    AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(request);
+    GameObject cube = bundle.LoadAsset<GameObject>("Cube");
+    GameObject sprite = bundle.LoadAsset<GameObject>("Sprite");
+    Instantiate(cube);
+    Instantiate(sprite);
+}
+```
+
+#### 建议
+
+一般来说，应该尽可能的采用[AssetBundle.LoadFromFile](https://unity3d.com/cn/learn/tutorials/topics/best-practices/assetbundle-fundamentals#AssetBundle.LoadFromFile)。这个API在速度，硬盘和运行内存的使用上是效率最高的。
+
+对于那些必须下载和对`AssetBundles`进行打补丁的项目来说，强烈建议：在Unity5.3以及更新的版本上使用[UnityWebRequest](https://unity3d.com/cn/learn/tutorials/topics/best-practices/assetbundle-fundamentals#AssetBundleDownloadHandler)，而那些使用Unity5.2或更老的项目则使用[WWW.LoadFromCacheOrDownload](https://unity3d.com/cn/learn/tutorials/topics/best-practices/assetbundle-fundamentals#WWW.LoadFromCacheOrDownload)。在下一章的[发布](https://link.jianshu.com?t=https://unity3d.com/learn/tutorials/topics/best-practices/asset-bundle-usage-patterns#Distribution)这节中我们将详细描述，如何将`AssetBundle`打包在在项目的安装包中。
+
+当使用`WWW.LoadFromCacheOrDownload`时，强烈建议你确保项目的`AssetBundles`小于项目最大内存预算的**2-3%**，来防止应用由于内存使用峰值被强行终止。对于大部分项目来说，`AssetBundles`的文件大小应该不超过5MB，并且同时下载的`AssetBundles`不超过1-2个。
+
+不论是用`WWW.LoadFromCacheOrDownload`还是`UnityWebRequest`，确保下载部分的代码在加载完`AssetBundle`后适时调用***Dispose***。还有一种选择：C#的[using](https://link.jianshu.com?t=https://msdn.microsoft.com/en-us//library/yh598w02.aspx)声明是最方便的方法来确保一个`www`或`UnityWebRequest`*被安全Dispose掉。
+
+对于那种大型团队和特殊缓存及下载需求的项目来说，定制一个Downloader是有必要的。自己写个`Downloader`是一项大工程，并且自己写的这些`Downloader`应该和`AssetBundle.LoadFromFile`兼容。详情请见下篇的[发布](https://link.jianshu.com?t=https://unity3d.com/learn/tutorials/topics/best-practices/asset-bundle-usage-patterns#Distribution)部分。
+
 ### 从Asset Bundle 加载 Asset
+
+`UnityEngine.Objects`可以通过三个不同的API从`AssetBundles`中加载。
+
+- [LoadAsset](https://docs.unity3d.com/ScriptReference/AssetBundle.LoadAsset.html) ([LoadAssetAsync](https://docs.unity3d.com/ScriptReference/AssetBundle.LoadAssetAsync.html))
+- [LoadAllAssets](https://docs.unity3d.com/ScriptReference/AssetBundle.LoadAllAssets.html) ([LoadAllAssetsAsync](https://docs.unity3d.com/ScriptReference/AssetBundle.LoadAllAssetsAsync.html))
+- [LoadAssetWithSubAssets](https://docs.unity3d.com/ScriptReference/AssetBundle.LoadAssetWithSubAssets.html) ([LoadAssetWithSubAssetsAsync](https://docs.unity3d.com/ScriptReference/AssetBundle.LoadAssetWithSubAssetsAsync.html))
+
+这些API的同步版本将始终比其异步版本快至少一帧。
+
+当加载多个独立的`UnityEngine.Object`时，可以使用`LoadAllAssets`。这个接口应该只在同一个`AssetBundle`中多数或全部`Objects`需要被加载时再去调用。相比于其他两个接口，**`LoadAllAssets`**比多次单独调用**`LoadAssets`**要快一点点。因此，如果需要同时加载大量`assets`，但是这些assets又不超过`AssetBundle`内容的三分之二，可以考虑将`AssetBundle`细分为多个小点的包，然后使用`LoadAllAssets`。
+
+当去加载一个**复杂**的`Asset`（包含许多内嵌的`Object`，比如一个`FBX`模型内嵌动画，或一个图集，内嵌多个精灵）时，可以使用`LoadAssetWithSubAssets`。如果这些需要加载的`Objects`都来自同一个`Asset`，同时这个`AssetBundle`中还有很多其他不相关的Objects，那就用这个接口。
+
+对于其他情况，就用`LoadAsset`或`LoadAssetAsync`吧。
+
+
 
 ### 管理已经加载Asset Bundle
 
