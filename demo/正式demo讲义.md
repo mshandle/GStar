@@ -870,12 +870,6 @@ AssetBundleManifest manifest = assetBundle.LoadAsset<AssetBundleManifest>("Asset
 1. 消除这个不想要的Object的所有引用，场景中和代码中的都要清除掉。都做好了，就可以调用[Resources.UnloadUnusedAssets](http://docs.unity3d.com/ScriptReference/Resources.UnloadUnusedAssets.html?_ga=1.234006365.236528352.1476878759)了。
 2. 以非叠加的方式加载一个场景。这样会销毁当前场景中的所有Objects，然后自动调用[Resources.UnloadUnusedAssets](http://docs.unity3d.com/ScriptReference/Resources.UnloadUnusedAssets.html?_ga=1.223912536.236528352.1476878759)。
 
-### 发布
-
-[1](https://www.jianshu.com/p/22a6876d39b5)
-
-[2](https://www.jianshu.com/p/07dd141c1181)
-
 > [Asset Bundle 官方文档](https://unity3d.com/cn/learn/tutorials/topics/best-practices/assetbundle-usage-patterns)
 
 ## 需求分析
