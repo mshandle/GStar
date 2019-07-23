@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<config>
+	<iggid>787546</iggid>
+	<language>CN</language>
+  <serverList>
+    <Server name = "服务器1" ip ="10.15.1.5:5088"/>
+    <Server name = "服务器2" ip ="10.15.1.6:5088"/>
+  </serverList>
+</config>

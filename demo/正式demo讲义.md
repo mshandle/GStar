@@ -17,19 +17,16 @@
 > [C# XML](https://docs.microsoft.com/zh-cn/previous-versions/gg145036(v=vs.110))
 
 ```xml
-<?xml version="1.0" encoding="utf-8"?>
-<WwiseSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <CopySoundBanksAsPreBuildStep>true</CopySoundBanksAsPreBuildStep>
-  <CreatedPicker>true</CreatedPicker>
-  <CreateWwiseGlobal>true</CreateWwiseGlobal>
-  <CreateWwiseListener>false</CreateWwiseListener>
-  <GenerateSoundBanksAsPreBuildStep>false</GenerateSoundBanksAsPreBuildStep>
-  <ShowMissingRigidBodyWarning>true</ShowMissingRigidBodyWarning>
-  <SoundbankPath>Audio/GeneratedSoundBanks</SoundbankPath>
-  <WwiseInstallationPathMac />
-  <WwiseInstallationPathWindows>C:\Program Files (x86)\Audiokinetic\Wwise 2018.1.5.6835</WwiseInstallationPathWindows>
-  <WwiseProjectPath>../../../../common/WwiseProj/princess_WwiseProject/princess_WwiseProject.wproj</WwiseProjectPath>
-</WwiseSettings>
+<?xml version="1.0" encoding="UTF-8" ?>
+<config>
+	<iggid>123456</iggid>
+	<language>CN</language>
+  <serverList>
+    <Server name = "服务器1" ip ="10.15.1.5:5088"/>
+    <Server name = "服务器2" ip ="10.15.1.6:5088"/>
+  </serverList>
+</config>
+
 ```
 
 优点
@@ -52,7 +49,7 @@
 
 ```json
 {
-    "iggid": 787546,
+    "iggid": 123456,
 	"language":"CN",
     "ServerList": [
 		
@@ -90,7 +87,19 @@
 缺点
 
 - 无法注释
-- 可读性差
+- 可读性对比XML较差
+
+| 空         | JsonUtility | Newtonsoft.json |
+| ---------- | ----------- | --------------- |
+| array      | 支持        | 支持            |
+| list       | 支持        | 支持            |
+| dictionary | 不支持      | 支持            |
+| hashtable  | 不支持      | 支持            |
+
+1. 一定要把需要序列化的数据结构 [Serializable], 因为 如果不加这个, `int, string`等单一的类型可以解析,  但是`array, list, dictionary ,hashtable`等复杂的数据结构不能被序列化
+
+1. 一定要记住: `json`文件里的字段名字,一定要和自己定义的需要序列化的数据结构里的名字"一模一样", 否则不会解析成功.
+   
 
 #### CSV
 
@@ -226,104 +235,7 @@ ID,Type,SubType,value1,value2,value3,achievement_id
 
 如果在项目组有一些是代码生成的配置，比如有节课我们的说的界面的配置信息。还有`assetbundle` 映射信息，这些都是通过程序生成的。这些配置推荐使用`scriptableObject`。因为写入的时候都是通过代码序列化，读取反序列的过程代码都是复用的，比较好操作。
 
-### 工程实现
 
-```C#
-public class Table
-{
-     private Dictionary<string, TableRecord> m_map = new Dictionary<string, TableRecord>();
-    public bool LoadTable(string contextstr,string filename,int mode = 0)
-    {
-        //TODO:
-    }
-    public int count()
-    {
-         return m_map.Count;
-    }
-    public TableRecord query(string key)
-    {
-         //TODO:
-    }
-    public  TableRecord query(int nid)
-    {
-          
-    }
-    public  TableRecord queryIndex(int nindex)
-    {
-          
-    }
-}
-```
-
-
-
-
-
-```
-public class TableRecord
-    {
-        private Dictionary<string, TableData> m_datas = new Dictionary<string, TableData>();
-
-        public string MainKey { set; get; }
-
-        public TableData Get(string key)
-        {
-            if (m_datas.ContainsKey(key))
-            {
-                return m_datas[key];
-            }
-            return null;
-        }
-
-        public bool HasValue(string key)
-        {
-            return m_datas.ContainsKey(key);
-        }
-
-        public void AddValue(string key, TableData value)
-        {
-            if (m_datas.ContainsKey(key))
-            {
-                m_datas[key] = value;
-            }
-            else
-            {
-                m_datas.Add(key, value);
-            }
-        }
-    }
-```
-
-
-
-```c#
-
-    public class LocalData : BaseComponentTemplate<LocalData>
-    {
-        Dictionary<string, Table> datas = new Dictionary<string, Table>();
-        public override bool Init(AppConfig config)
-        {
-            DebugLog.Log("LocalData");
-            return base.Init(config);
-        }
-
-        public Table GetTable(string key)
-        {
-            Table table;
-            if(datas.TryGetValue(key, out table))
-            {
-                return table;
-            }
-            return null;
-        }
-
-        public void AddTable(string key, Table table)
-        {
-            datas[key] = table;
-        }
-
-    }
-```
 
 ## 消息中心
 
@@ -874,15 +786,23 @@ AssetBundleManifest manifest = assetBundle.LoadAsset<AssetBundleManifest>("Asset
 
 ## 需求分析
 
-### 引擎的选择
-
-
-
 ### 资源整体大小的评估
+
+#### 贴图
+
+#### 模型
+
+#### 动画
 
 ### 制作流程设计
 
-### 性能评估
+#### 工具链
+
+#### 检查工具
+
+### 性能
+
+#### 
 
 
 
