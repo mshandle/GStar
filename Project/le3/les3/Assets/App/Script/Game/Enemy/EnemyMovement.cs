@@ -16,6 +16,9 @@ public class EnemyMovement : MonoBehaviour
         //playerHealth = player.GetComponent <PlayerHealth> ();
         //enemyHealth = GetComponent <EnemyHealth> ();
         nav = gameObject.AddComponent<UnityEngine.AI.NavMeshAgent>();
+        nav.baseOffset = 0;
+        nav.radius = 0.8f;
+        nav.height = 1.2f;
     }
 
     public void Target(Transform target)

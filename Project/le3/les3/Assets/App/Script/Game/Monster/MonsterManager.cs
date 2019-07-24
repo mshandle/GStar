@@ -31,6 +31,7 @@ public class MonsterManager:MonoBehaviour
                 int spawnPointIndex = UnityEngine.Random.Range(0, spawnPoints.Length);
                 GameObject monster =  factory.CreateMonster(id, spawnPoints[spawnPointIndex]);
                 var moveComponent = monster.AddComponent<EnemyMovement>();
+                monster.AddComponent<EnemyHealth>();
                 moveComponent.Target(target);
 
             }, trigger.time, trigger.repeat, trigger.id);
