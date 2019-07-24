@@ -34,6 +34,7 @@ class LoginScene : Framework.BaseScene
         Framework.DebugLog.Log("Load LoginScen complete");
 
         LoginView View = UIMgr.Instance.OpenUI<LoginView>(WindowsID.Login);
+        View.LoginBtn.onClick.RemoveAllListeners();
         View.LoginBtn.onClick.AddListener(() =>
         {
             Framework.SceneMgr.Instance.LoadScene(MainScene.Name);

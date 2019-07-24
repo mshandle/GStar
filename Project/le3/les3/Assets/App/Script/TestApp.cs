@@ -35,7 +35,7 @@ public class TestApp : Framework.GameApp
 
     private void ConfigUIInfos()
     {
-        UIMgr.Instance.registerInfo(WindowsID.Login, new UIInfo("UI/prefab/Login/LoginView.prefab",true));
+        UIMgr.Instance.registerInfo(WindowsID.Login, new UIInfo("UI/prefab/Login/LoginView.prefab"));
         UIMgr.Instance.registerInfo(WindowsID.Main, new UIInfo("UI/prefab/main/MainView.prefab"));
     }
 }

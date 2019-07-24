@@ -39,6 +39,12 @@ public class MonsterManager:MonoBehaviour
         return true;
     }
 
+    private void OnDestroy()
+    {
+        TimerManager.Instance.Reset();
+    }
+
+
     private void Update()
     {
 
