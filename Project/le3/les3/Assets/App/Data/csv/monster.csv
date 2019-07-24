@@ -1,0 +1,3 @@
+id,res,hp,attack,frequency,score
+1,model/monster/ZomBear/ZomBear_monster.prefab,100,15,0.5,10
+2,model/monster/Zombuny/Zombunny_monster.prefab,200,30,2,15

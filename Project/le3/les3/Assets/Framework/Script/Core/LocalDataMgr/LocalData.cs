@@ -6,26 +6,38 @@ namespace Framework
 {
     public class LocalData : BaseComponentTemplate<LocalData>
     {
-        Dictionary<string, Table> datas = new Dictionary<string, Table>();
+        Dictionary<string, ITable> datas = new Dictionary<string, ITable>();
         public override bool Init(AppConfig config)
         {
             DebugLog.Log("LocalData");
             return base.Init(config);
         }
 
-        public Table GetTable(string key)
+        public ITable GetTable<T>() where T : IRecord
         {
-            Table table;
-            if(datas.TryGetValue(key, out table))
+            System.Type type = typeof(T);
+            string name = type.Name;
+
+            ITable table;
+            if (datas.TryGetValue(name, out table))
             {
                 return table;
             }
             return null;
         }
 
-        public void AddTable(string key, Table table)
+        public void AddTable<T>(string path) where T : IRecord
         {
-            datas[key] = table;
+            //datas[key] = table;
+            System.Type type = typeof(T);
+            string name = type.Name;
+
+            TextAsset textAsset = ResoruceMgr.instance.Load<TextAsset>(path);
+            T[] records = CSVSerializer.Deserialize<T>(textAsset.text);
+
+            Table table = new Table();
+            table.AddRecords<T>(records);
+            datas.Add(name, table);
         }
 
     }

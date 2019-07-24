@@ -21,6 +21,7 @@ namespace Framework
             AddGameComponent<NetMgr>();
             AddGameComponent<SceneMgr>();
             AddGameComponent<UIMgr>();
+            AddGameComponent<TimerManager>();
             return this.InitComponents(config);
 
 
